@@ -19,74 +19,22 @@ class HDBrainExtractionTool(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "HDBrainExtractionTool"  # TODO: make this more human readable by adding spaces
-    self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
-    self.parent.dependencies = []  # TODO: add here list of module names that this module requires
-    self.parent.contributors = ["John Doe (AnyWare Corp.)"]  # TODO: replace with "Firstname Lastname (Organization)"
-    # TODO: update with short description of the module and a link to online module documentation
+    self.parent.title = "HD Brain Extraction Tool"
+    self.parent.categories = ["Segmentation"]
+    self.parent.dependencies = []
+    self.parent.contributors = ["Andras Lasso (PerkLab, Queen's University)"]
     self.parent.helpText = """
-This is an example of scripted loadable module bundled in an extension.
-See more information in <a href="https://github.com/organization/projectname#HDBrainExtractionTool">module documentation</a>.
+Strip skull from brain MRI images using HD-BET tool.
+See more information in <a href="https://github.com/lassoan/SlicerHDBrainExtraction">module documentation</a>.
 """
-    # TODO: replace with organization, grant and thanks
     self.parent.acknowledgementText = """
-This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc., Andras Lasso, PerkLab,
-and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
+This file was originally developed by Andras Lasso (PerkLab, Queen's University).
+The module uses <a href="https://github.com/MIC-DKFZ/HD-BET">HD-BET brain extraction toolkit</a>.
+If you are using HD-BET, please cite the following publication: Isensee F, Schell M, Tursunova I, Brugnara G,
+Bonekamp D, Neuberger U, Wick A, Schlemmer HP, Heiland S, Wick W, Bendszus M, Maier-Hein KH, Kickingereder P.
+Automated brain extraction of multi-sequence MRI using artificial neural networks. Hum Brain Mapp. 2019; 1–13.
+https://doi.org/10.1002/hbm.24750
 """
-
-    # Additional initialization step after application startup is complete
-    slicer.app.connect("startupCompleted()", registerSampleData)
-
-
-#
-# Register sample data sets in Sample Data module
-#
-
-def registerSampleData():
-  """
-  Add data sets to Sample Data module.
-  """
-  # It is always recommended to provide sample data for users to make it easy to try the module,
-  # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
-
-  import SampleData
-  iconsPath = os.path.join(os.path.dirname(__file__), 'Resources/Icons')
-
-  # To ensure that the source code repository remains small (can be downloaded and installed quickly)
-  # it is recommended to store data sets that are larger than a few MB in a Github release.
-
-  # HDBrainExtractionTool1
-  SampleData.SampleDataLogic.registerCustomSampleDataSource(
-    # Category and sample name displayed in Sample Data module
-    category='HDBrainExtractionTool',
-    sampleName='HDBrainExtractionTool1',
-    # Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
-    # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
-    thumbnailFileName=os.path.join(iconsPath, 'HDBrainExtractionTool1.png'),
-    # Download URL and target file name
-    uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
-    fileNames='HDBrainExtractionTool1.nrrd',
-    # Checksum to ensure file integrity. Can be computed by this command:
-    #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
-    checksums = 'SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95',
-    # This node name will be used when the data set is loaded
-    nodeNames='HDBrainExtractionTool1'
-  )
-
-  # HDBrainExtractionTool2
-  SampleData.SampleDataLogic.registerCustomSampleDataSource(
-    # Category and sample name displayed in Sample Data module
-    category='HDBrainExtractionTool',
-    sampleName='HDBrainExtractionTool2',
-    thumbnailFileName=os.path.join(iconsPath, 'HDBrainExtractionTool2.png'),
-    # Download URL and target file name
-    uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
-    fileNames='HDBrainExtractionTool2.nrrd',
-    checksums = 'SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97',
-    # This node name will be used when the data set is loaded
-    nodeNames='HDBrainExtractionTool2'
-  )
-
 
 #
 # HDBrainExtractionToolWidget
@@ -136,11 +84,10 @@ class HDBrainExtractionToolWidget(ScriptedLoadableModuleWidget, VTKObservationMi
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
-    self.ui.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    self.ui.outputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    self.ui.imageThresholdSliderWidget.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
-    self.ui.invertOutputCheckBox.connect("toggled(bool)", self.updateParameterNodeFromGUI)
-    self.ui.invertedOutputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.inputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.outputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.deviceComboBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
 
     # Buttons
     self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
@@ -232,19 +179,23 @@ class HDBrainExtractionToolWidget(ScriptedLoadableModuleWidget, VTKObservationMi
     self._updatingGUIFromParameterNode = True
 
     # Update node selectors and sliders
-    self.ui.inputSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
-    self.ui.outputSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputVolume"))
-    self.ui.invertedOutputSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputVolumeInverse"))
-    self.ui.imageThresholdSliderWidget.value = float(self._parameterNode.GetParameter("Threshold"))
-    self.ui.invertOutputCheckBox.checked = (self._parameterNode.GetParameter("Invert") == "true")
+    self.ui.inputVolumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
+    self.ui.outputVolumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputVolume"))
+    self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
+    self.ui.deviceComboBox.setCurrentText(self._parameterNode.GetParameter("Device"))
 
     # Update buttons states and tooltips
-    if self._parameterNode.GetNodeReference("InputVolume") and self._parameterNode.GetNodeReference("OutputVolume"):
-      self.ui.applyButton.toolTip = "Compute output volume"
+    inputVolume = self._parameterNode.GetNodeReference("InputVolume")
+    if inputVolume and (self._parameterNode.GetNodeReference("OutputVolume") or self._parameterNode.GetNodeReference("OutputSegmentation")):
+      self.ui.applyButton.toolTip = "Extract brain"
       self.ui.applyButton.enabled = True
     else:
-      self.ui.applyButton.toolTip = "Select input and output volume nodes"
+      self.ui.applyButton.toolTip = "Select input volume and at least one output"
       self.ui.applyButton.enabled = False
+
+    if inputVolume:
+      self.ui.outputVolumeSelector.baseName = inputVolume.GetName() + " stripped"
+      self.ui.outputSegmentationSelector.baseName = inputVolume.GetName() + " mask"
 
     # All the GUI updates are done
     self._updatingGUIFromParameterNode = False
@@ -260,11 +211,10 @@ class HDBrainExtractionToolWidget(ScriptedLoadableModuleWidget, VTKObservationMi
 
     wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
 
-    self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputSelector.currentNodeID)
-    self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputSelector.currentNodeID)
-    self._parameterNode.SetParameter("Threshold", str(self.ui.imageThresholdSliderWidget.value))
-    self._parameterNode.SetParameter("Invert", "true" if self.ui.invertOutputCheckBox.checked else "false")
-    self._parameterNode.SetNodeReferenceID("OutputVolumeInverse", self.ui.invertedOutputSelector.currentNodeID)
+    self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
+    self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputVolumeSelector.currentNodeID)
+    self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
+    self._parameterNode.SetParameter("Device", self.ui.deviceComboBox.currentText)
 
     self._parameterNode.EndModify(wasModified)
 
@@ -274,16 +224,21 @@ class HDBrainExtractionToolWidget(ScriptedLoadableModuleWidget, VTKObservationMi
     """
     with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
+      self.logic.setupPythonRequirements()
+
+      if self.ui.deviceComboBox.currentIndex == 0:
+        device = "auto"
+      elif self.ui.deviceComboBox.currentIndex == 1:
+        device = "cpu"
+      else:
+        device = (self.ui.deviceComboBox.currentIndex - 2)
+
       # Compute output
-      self.logic.process(self.ui.inputSelector.currentNode(), self.ui.outputSelector.currentNode(),
-        self.ui.imageThresholdSliderWidget.value, self.ui.invertOutputCheckBox.checked)
+      self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputVolumeSelector.currentNode(),
+        self.ui.outputSegmentationSelector.currentNode(), device)
 
-      # Compute inverted output (if needed)
-      if self.ui.invertedOutputSelector.currentNode():
-        # If additional output volume is selected then result with inverted threshold is written there
-        self.logic.process(self.ui.inputSelector.currentNode(), self.ui.invertedOutputSelector.currentNode(),
-          self.ui.imageThresholdSliderWidget.value, not self.ui.invertOutputCheckBox.checked, showResult=False)
-
+      if self.ui.outputVolumeSelector.currentNode():
+        slicer.util.setSliceViewerLayers(background=self.ui.outputVolumeSelector.currentNode())
 
 #
 # HDBrainExtractionToolLogic
@@ -305,16 +260,52 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
     """
     ScriptedLoadableModuleLogic.__init__(self)
 
+  def setupPythonRequirements(self):
+
+    # Install PyTorch
+    import PyTorchUtils
+    torchLogic = PyTorchUtils.PyTorchUtilsLogic()
+    if not torchLogic.torchInstalled():
+      logging.info('PyTorch module not found')
+      torch = torchLogic.installTorch(askConfirmation=True)
+      if torch is None:
+        raise ValueError('PyTorch extension needs to be installed to use this module.')
+
+    # Install HD-BET
+    needToInstallHdBet = False
+    try:
+      import HD_BET
+    except ModuleNotFoundError as e:
+      needToInstallHdBet = True
+    if needToInstallHdBet:
+      # Download HD-BET repository from github as a zip file
+      tempFolder = slicer.util.tempDirectory()
+      import SampleData
+      dataLogic = SampleData.SampleDataLogic()
+      hdBetZipFilePath = dataLogic.downloadFile('https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip', tempFolder, 'HD-BET.zip')
+      # Unzip file
+      slicer.util.extractArchive(hdBetZipFilePath, tempFolder)
+      # Copy HD_BET subfolder to this module's folder so that it can be found as a Python package
+      import shutil
+      scriptedModulesPath = os.path.dirname(slicer.util.modulePath(self.moduleName))
+      shutil.move(tempFolder+"/HD-BET-master/HD_BET", scriptedModulesPath+"/HD_BET")
+      import HD_BET
+
+    # Ensure that the download folder for model files exist
+    import os
+    os.makedirs(HD_BET.paths.folder_with_parameter_files, exist_ok=True)
+
+    # Install batchgenerators
+    slicer.util.pip_install('git+https://github.com/MIC-DKFZ/batchgenerators#egg=batchgenerators')
+
   def setDefaultParameters(self, parameterNode):
     """
     Initialize parameter node with default settings.
     """
-    if not parameterNode.GetParameter("Threshold"):
-      parameterNode.SetParameter("Threshold", "100.0")
-    if not parameterNode.GetParameter("Invert"):
-      parameterNode.SetParameter("Invert", "false")
+    if not parameterNode.GetParameter("Device"):
+      parameterNode.SetParameter("Device", "auto")
 
-  def process(self, inputVolume, outputVolume, imageThreshold, invert=False, showResult=True):
+  def process(self, inputVolume, outputVolume, outputSegmentation, device=None):
     """
     Run the processing algorithm.
     Can be used without GUI widget.
@@ -325,23 +316,82 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
     :param showResult: show output volume in slice viewers
     """
 
-    if not inputVolume or not outputVolume:
+    if not inputVolume:
       raise ValueError("Input or output volume is invalid")
 
     import time
     startTime = time.time()
     logging.info('Processing started')
 
-    # Compute the thresholded output volume using the "Threshold Scalar Volume" CLI module
-    cliParams = {
-      'InputVolume': inputVolume.GetID(),
-      'OutputVolume': outputVolume.GetID(),
-      'ThresholdValue' : imageThreshold,
-      'ThresholdType' : 'Above' if invert else 'Below'
-      }
-    cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True, update_display=showResult)
-    # We don't need the CLI module node anymore, remove it to not clutter the scene with it
-    slicer.mrmlScene.RemoveNode(cliNode)
+    if not device:
+      device = "auto"
+
+    if device == "auto":
+      import PyTorchUtils
+      torchLogic = PyTorchUtils.PyTorchUtilsLogic()
+      if torchLogic.cuda:
+        device = 0
+      else:
+        device = "cpu"
+
+    import os
+    from HD_BET.run import run_hd_bet
+    from HD_BET.utils import maybe_mkdir_p, subfiles
+    import HD_BET
+
+    # Create new empty folder
+    tempFolder = slicer.util.tempDirectory()
+
+    input_file = tempFolder+"/hdbet-input.nii.gz"
+    output_file = tempFolder+"/hdbet-output.nii.gz"
+    output_segmentation_file = tempFolder+"/hdbet-output_mask.nii.gz"
+
+    # Write input volume to file
+    volumeStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLVolumeArchetypeStorageNode")
+    volumeStorageNode.SetFileName(input_file)
+    volumeStorageNode.WriteData(inputVolume)
+    volumeStorageNode.UnRegister(None)
+
+
+    # The options -mode fast and -tta 0 will disable test time data augmentation (speedup of 8x)
+    # and use only one model instead of an ensemble of five models for the prediction.
+    gpu = (device != 'cpu')
+    mode = 'accurate' if gpu else 'fast'
+    tta = gpu  # augmentation
+    pp = True  # post-processing
+    save_mask = outputSegmentation is not None
+    overwrite_existing = True
+
+    params_file = os.path.join(HD_BET.__path__[0], "model_final.py")
+    config_file = os.path.join(HD_BET.__path__[0], "config.py")
+
+    run_hd_bet([input_file], [output_file], mode, config_file, device, pp, tta, save_mask, overwrite_existing)
+
+    if outputVolume:
+      volumeStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLVolumeArchetypeStorageNode")
+      volumeStorageNode.SetFileName(output_file)
+      volumeStorageNode.ReadData(outputVolume)
+      volumeStorageNode.UnRegister(None)
+
+    if outputSegmentation:
+      segmentationStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLSegmentationStorageNode")
+      segmentationStorageNode.SetFileName(output_segmentation_file)
+      segmentationStorageNode.ReadData(outputSegmentation)
+      segmentationStorageNode.UnRegister(None)
+
+      # Set segment terminology
+      segmentId = outputSegmentation.GetSegmentation().GetNthSegmentID(0)
+      segment = outputSegmentation.GetSegmentation().GetSegment(segmentId)
+      segment.SetTag(segment.GetTerminologyEntryTagName(),
+        "Segmentation category and type - 3D Slicer General Anatomy list"
+        "~SCT^123037004^Anatomical Structure"
+        "~SCT^12738006^Brain"
+        "~^^"
+        "~Anatomic codes - DICOM master list"
+        "~^^"
+        "~^^")
+      segment.SetName("brain")
+      segment.SetColor(0.9803921568627451, 0.9803921568627451, 0.8823529411764706)
 
     stopTime = time.time()
     logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
@@ -386,31 +436,22 @@ class HDBrainExtractionToolTest(ScriptedLoadableModuleTest):
     # Get/create input data
 
     import SampleData
-    registerSampleData()
-    inputVolume = SampleData.downloadSample('HDBrainExtractionTool1')
+    inputVolume = SampleData.downloadSample('MRBrainTumor1')
     self.delayDisplay('Loaded test data set')
 
-    inputScalarRange = inputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(inputScalarRange[0], 0)
-    self.assertEqual(inputScalarRange[1], 695)
-
-    outputVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode")
-    threshold = 100
+    outputVolume = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLScalarVolumeNode')
+    outputSegmentation = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode')
 
     # Test the module logic
 
     logic = HDBrainExtractionToolLogic()
 
-    # Test algorithm with non-inverted threshold
-    logic.process(inputVolume, outputVolume, threshold, True)
-    outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-    self.assertEqual(outputScalarRange[1], threshold)
+    self.delayDisplay('Set up required Python packages')
+    logic.setupPythonRequirements()
 
-    # Test algorithm with inverted threshold
-    logic.process(inputVolume, outputVolume, threshold, False)
-    outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-    self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-    self.assertEqual(outputScalarRange[1], inputScalarRange[1])
+    self.delayDisplay('Compute output')
+    logic.process(inputVolume, outputVolume, outputSegmentation)
+
+    slicer.util.setSliceViewerLayers(background=outputVolume)
 
     self.delayDisplay('Test passed')

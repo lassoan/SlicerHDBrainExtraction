@@ -25,9 +25,9 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="inputSelector">
+       <widget class="qMRMLNodeComboBox" name="inputVolumeSelector">
         <property name="toolTip">
-         <string>Pick the input to the algorithm.</string>
+         <string>Input brain MRI volume</string>
         </property>
         <property name="nodeTypes">
          <stringlist>
@@ -42,32 +42,6 @@
         </property>
         <property name="removeEnabled">
          <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Image threshold:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="ctkSliderWidget" name="imageThresholdSliderWidget">
-        <property name="toolTip">
-         <string>Set threshold value for computing the output image. Voxels that have intensities lower than this value will set to zero.</string>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="minimum">
-         <double>-100.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>500.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>0.500000000000000</double>
         </property>
        </widget>
       </item>
@@ -83,14 +57,14 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Thresholded volume:</string>
+         <string>Skull-stripped volume:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="outputSelector">
+       <widget class="qMRMLNodeComboBox" name="outputVolumeSelector">
         <property name="toolTip">
-         <string>Pick the output to the algorithm.</string>
+         <string>Pick the output volume that only contains the brain, everything outside is blanked out.</string>
         </property>
         <property name="nodeTypes">
          <stringlist>
@@ -107,6 +81,12 @@
          <bool>true</bool>
         </property>
         <property name="removeEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
          <bool>true</bool>
         </property>
        </widget>
@@ -114,22 +94,25 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Inverted volume:</string>
+         <string>Brain segmentation:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="qMRMLNodeComboBox" name="invertedOutputSelector">
+       <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
         <property name="toolTip">
-         <string>Result with inverted threshold will be written into this volume</string>
+         <string>If a segmentation is selected here then the brain mask will be saved into it.</string>
         </property>
         <property name="nodeTypes">
          <stringlist>
-          <string>vtkMRMLScalarVolumeNode</string>
+          <string>vtkMRMLSegmentationNode</string>
          </stringlist>
         </property>
         <property name="showChildNodeTypes">
          <bool>false</bool>
+        </property>
+        <property name="baseName">
+         <string>Brain</string>
         </property>
         <property name="noneEnabled">
          <bool>true</bool>
@@ -138,6 +121,12 @@
          <bool>true</bool>
         </property>
         <property name="removeEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
          <bool>true</bool>
         </property>
        </widget>
@@ -157,18 +146,45 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Invert threshold: </string>
+         <string>Device:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="invertOutputCheckBox">
+       <widget class="ctkComboBox" name="deviceComboBox">
         <property name="toolTip">
-         <string>If checked, values above threshold are set to 0. If unchecked, values below are set to 0.</string>
+         <string>&quot;auto&quot; uses first GPU if available and CPU otherwise. &quot;cpu&quot; forces to use the CPU, other options force selecting a specific GPU.</string>
         </property>
-        <property name="text">
-         <string/>
-        </property>
+        <item>
+         <property name="text">
+          <string>auto</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cpu</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>gpu 0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>gpu 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>gpu 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>gpu 3</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -210,9 +226,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ctkSliderWidget</class>
-   <extends>QWidget</extends>
-   <header>ctkSliderWidget.h</header>
+   <class>ctkComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ctkComboBox.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLNodeComboBox</class>
@@ -231,7 +247,7 @@
   <connection>
    <sender>HDBrainExtractionTool</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>inputSelector</receiver>
+   <receiver>inputVolumeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -239,15 +255,15 @@
      <y>132</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
-     <y>61</y>
+     <x>260</x>
+     <y>60</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>HDBrainExtractionTool</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>outputSelector</receiver>
+   <receiver>outputVolumeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -255,15 +271,15 @@
      <y>135</y>
     </hint>
     <hint type="destinationlabel">
-     <x>220</x>
-     <y>161</y>
+     <x>260</x>
+     <y>127</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>HDBrainExtractionTool</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>invertedOutputSelector</receiver>
+   <receiver>outputSegmentationSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -271,8 +287,8 @@
      <y>8</y>
     </hint>
     <hint type="destinationlabel">
-     <x>173</x>
-     <y>176</y>
+     <x>260</x>
+     <y>153</y>
     </hint>
    </hints>
   </connection>
