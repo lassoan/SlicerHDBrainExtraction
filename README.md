@@ -19,8 +19,10 @@ As per request of the HD-BET team, if you are using HD-BET, please cite the foll
 - Select `Skull-stripped volume` -> `Create new volume`
 - Select `Brain segmentation` -> `Create new segmentation`
 - Click `Apply`
-- If you are prompted to install any additional packages then accept that and wait for a couple of minutes.
-- If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take 5-10 minutes!
+  - If you are prompted to install any additional packages then accept that and wait for a couple of minutes.
+  - If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take 5-10 minutes!
+- To display the skull-stripped volume in 3D: go to Data module and drag-and-drop the skull-stripped volume into the 3D view.
+- To display the brain mask in 3D: go to Data module and drag-and-drop the segmented into the 3D view.
 
 ## User interface
 
