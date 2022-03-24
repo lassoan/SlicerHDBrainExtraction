@@ -287,12 +287,14 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
       slicer.util.extractArchive(hdBetZipFilePath, tempFolder)
       # Copy HD_BET subfolder to this module's folder so that it can be found as a Python package
       import shutil
+      import os
       scriptedModulesPath = os.path.dirname(slicer.util.modulePath(self.moduleName))
       shutil.move(tempFolder+"/HD-BET-master/HD_BET", scriptedModulesPath+"/HD_BET")
       import HD_BET
 
     # Ensure that the download folder for model files exist
     import os
+    import HD_BET.paths
     os.makedirs(HD_BET.paths.folder_with_parameter_files, exist_ok=True)
 
     # Install batchgenerators
@@ -352,20 +354,21 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
     volumeStorageNode.WriteData(inputVolume)
     volumeStorageNode.UnRegister(None)
 
-
-    # The options -mode fast and -tta 0 will disable test time data augmentation (speedup of 8x)
-    # and use only one model instead of an ensemble of five models for the prediction.
+    # Run the algorithm. This section is based on HD_BET\hd-bet script.
+    # The mode='fast' and tta=False will disable test time data augmentation (speedup of 8x)
+    # and use only one model instead of an ensemble of five models for the prediction,
+    # to reduce computation time when no GPU is available (can still take 5-10 minutes).
     gpu = (device != 'cpu')
     mode = 'accurate' if gpu else 'fast'
     tta = gpu  # augmentation
     pp = True  # post-processing
     save_mask = outputSegmentation is not None
     overwrite_existing = True
-
     params_file = os.path.join(HD_BET.__path__[0], "model_final.py")
     config_file = os.path.join(HD_BET.__path__[0], "config.py")
-
     run_hd_bet([input_file], [output_file], mode, config_file, device, pp, tta, save_mask, overwrite_existing)
+
+    # Read results from output files
 
     if outputVolume:
       volumeStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLVolumeArchetypeStorageNode")
@@ -444,14 +447,22 @@ class HDBrainExtractionToolTest(ScriptedLoadableModuleTest):
 
     # Test the module logic
 
-    logic = HDBrainExtractionToolLogic()
+    # Logic testing is disabled by default to not overload automatic build machines (pytorch is a huge package and computation
+    # on CPU takes 5-10 minutes). Set testLogic to True to enable testing.
+    testLogic = False
 
-    self.delayDisplay('Set up required Python packages')
-    logic.setupPythonRequirements()
+    if testLogic:
+      logic = HDBrainExtractionToolLogic()
 
-    self.delayDisplay('Compute output')
-    logic.process(inputVolume, outputVolume, outputSegmentation)
+      self.delayDisplay('Set up required Python packages')
+      logic.setupPythonRequirements()
 
-    slicer.util.setSliceViewerLayers(background=outputVolume)
+      self.delayDisplay('Compute output')
+      logic.process(inputVolume, outputVolume, outputSegmentation)
+
+      slicer.util.setSliceViewerLayers(background=outputVolume)
+    
+    else:
+      logging.warning("test_HDBrainExtractionTool1 logic testing was skipped")
 
     self.delayDisplay('Test passed')

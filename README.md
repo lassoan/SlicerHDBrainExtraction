@@ -19,8 +19,8 @@ As per request of the HD-BET team, if you are using HD-BET, please cite the foll
 - Select `Skull-stripped volume` -> `Create new volume`
 - Select `Brain segmentation` -> `Create new segmentation`
 - Click `Apply`
-- If you are prompted to install any additional packages then accept that and wait for a couple of minutes
-- If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take several minutes.
+- If you are prompted to install any additional packages then accept that and wait for a couple of minutes.
+- If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take 5-10 minutes!
 
 ## User interface
 
@@ -34,6 +34,8 @@ As per request of the HD-BET team, if you are using HD-BET, please cite the foll
      - auto: first GPU is used if CUDA is installed; otherwise CPU is used
      - cpu: use the CPU for computation, it is slower and may produce slightly lower quality result
      - gpu N: use the N-th GPU
+
+Note: HD-BET downloads the model file (about 65MB) in the user's home directory in `hd-bet_params` folder. The folder can be removed if HD-BET is no longer used (the tool downloads the model again if needed).
 
 ## Contact
 
