@@ -43,4 +43,4 @@ Note: HD-BET downloads the model file (about 65MB) in the user's home directory 
 
 Please post any questions to the [Slicer Forum](https://discourse.slicer.org).
 
-Developers of this extension are not associated with the developers of the HD-BET HD-BET brain extraction tool, just provide the convenient 3D Slicer based user interface.
+Developers of this extension are not associated with the developers of the HD-BET brain extraction tool, just provide the convenient 3D Slicer based user interface.
