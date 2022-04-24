@@ -1,4 +1,4 @@
-# SlicerHDBrainExtraction
+# HDBrainExtraction
 
 [3D Slicer](https://www.slicer.org) extension for skull stripping in brain MRI images using [HD-BET brain extraction tool](https://github.com/MIC-DKFZ/HD-BET).
 
