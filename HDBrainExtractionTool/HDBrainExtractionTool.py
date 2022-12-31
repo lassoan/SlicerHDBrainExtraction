@@ -298,7 +298,13 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
     os.makedirs(HD_BET.paths.folder_with_parameter_files, exist_ok=True)
 
     # Install batchgenerators
-    slicer.util.pip_install('git+https://github.com/MIC-DKFZ/batchgenerators#egg=batchgenerators')
+    needToInstallBatchGenerators = False
+    try:
+      import batchgenerators
+    except ModuleNotFoundError as e:
+      needToInstallBatchGenerators = True
+    if needToInstallBatchGenerators:
+      slicer.util.pip_install('batchgenerators')
 
   def setDefaultParameters(self, parameterNode):
     """
