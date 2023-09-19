@@ -364,15 +364,22 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
     # The mode='fast' and tta=False will disable test time data augmentation (speedup of 8x)
     # and use only one model instead of an ensemble of five models for the prediction,
     # to reduce computation time when no GPU is available (can still take 5-10 minutes).
-    gpu = (device != 'cpu')
-    mode = 'accurate' if gpu else 'fast'
-    tta = gpu  # augmentation
-    pp = True  # post-processing
+    if device != 'cpu':
+      # GPU is available
+      mode = 'accurate'
+      enable_augmentation = True
+    else:
+      # GPU is not available, only do fast, less accurate processing
+      mode = 'fast'
+      enable_augmentation = False
     save_mask = outputSegmentation is not None
-    overwrite_existing = True
+    save_masked_volume = outputVolume is not None
     params_file = os.path.join(HD_BET.__path__[0], "model_final.py")
     config_file = os.path.join(HD_BET.__path__[0], "config.py")
-    run_hd_bet([input_file], [output_file], mode, config_file, device, pp, tta, save_mask, overwrite_existing)
+    run_hd_bet([input_file], [output_file], mode, config_file, device, postprocess = True, do_tta = enable_augmentation, keep_mask = save_mask, overwrite = True, bet = save_masked_volume)
+
+    # Input file is no longer needed
+    os.remove(input_file)
 
     # Read results from output files
 
@@ -381,12 +388,14 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
       volumeStorageNode.SetFileName(output_file)
       volumeStorageNode.ReadData(outputVolume)
       volumeStorageNode.UnRegister(None)
+      os.remove(output_file)
 
     if outputSegmentation:
       segmentationStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLSegmentationStorageNode")
       segmentationStorageNode.SetFileName(output_segmentation_file)
       segmentationStorageNode.ReadData(outputSegmentation)
       segmentationStorageNode.UnRegister(None)
+      os.remove(output_segmentation_file)
 
       # Set segment terminology
       segmentId = outputSegmentation.GetSegmentation().GetNthSegmentID(0)
@@ -467,7 +476,7 @@ class HDBrainExtractionToolTest(ScriptedLoadableModuleTest):
       logic.process(inputVolume, outputVolume, outputSegmentation)
 
       slicer.util.setSliceViewerLayers(background=outputVolume)
-    
+
     else:
       logging.warning("test_HDBrainExtractionTool1 logic testing was skipped")
 
