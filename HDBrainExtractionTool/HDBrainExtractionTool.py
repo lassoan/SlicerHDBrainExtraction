@@ -282,14 +282,15 @@ class HDBrainExtractionToolLogic(ScriptedLoadableModuleLogic):
       tempFolder = slicer.util.tempDirectory()
       import SampleData
       dataLogic = SampleData.SampleDataLogic()
-      hdBetZipFilePath = dataLogic.downloadFile('https://github.com/MIC-DKFZ/HD-BET/archive/refs/heads/master.zip', tempFolder, 'HD-BET.zip')
+      ref = "0dcab33233e991b9f7a7cb33052b164eb50062bd"  # v1.1
+      hdBetZipFilePath = dataLogic.downloadFile(f'https://github.com/MIC-DKFZ/HD-BET/archive/{ref}.zip', tempFolder, 'HD-BET.zip')
       # Unzip file
       slicer.util.extractArchive(hdBetZipFilePath, tempFolder)
       # Copy HD_BET subfolder to this module's folder so that it can be found as a Python package
       import shutil
       import os
       scriptedModulesPath = os.path.dirname(slicer.util.modulePath(self.moduleName))
-      shutil.move(tempFolder+"/HD-BET-master/HD_BET", scriptedModulesPath+"/HD_BET")
+      shutil.move(tempFolder + f"/HD-BET-{ref}/HD_BET", scriptedModulesPath+"/HD_BET")
       import HD_BET
 
     # Ensure that the download folder for model files exist
